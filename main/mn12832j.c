@@ -130,37 +130,67 @@ void vfd_gpio_init(void) {
 uint8_t vfd_gram[128][4] = {0};
 
 void vfd_send_data(void) {
-    for (uint8_t cycle = 0; cycle < 63; cycle++) {
+    for (;;) {
+        for (uint8_t cycle = 0; cycle < 63; cycle++) {
+            for (uint8_t row = 0; row < 32; row++) {
+                rmt_si_data[row].level1 =
+                    (vfd_gram[cycle * 2 + 1][row / 8] & (1 << (row & 7))) >= 1;
+                rmt_si_data[row].level0 =
+                    (vfd_gram[cycle * 2 + 2][row / 8] & (1 << (row & 7))) >= 1;
+            };
+            gpio_set_level(BKG, 1);
+            if (cycle & 1) {
+                gpio_set_level(BK1, 1);
+            } else {
+                gpio_set_level(BK2, 1);
+            };
+            vTaskDelay(5 / (1000 * portTICK_PERIOD_MS));
+            gpio_set_level(LAT, 1);
+            if (cycle == 0 || cycle == 1) {
+                gpio_set_level(SIG, 1);
+                gpio_set_level(CLKG, 0);
+                gpio_set_level(CLKG, 1);
+                gpio_set_level(SIG, 0);
+            } else {
+                gpio_set_level(CLKG, 0);
+                gpio_set_level(CLKG, 1);
+            };
+            vTaskDelay(5 / (1000 * portTICK_PERIOD_MS));
+            gpio_set_level(LAT, 0);
+            if (cycle & 1) {
+                gpio_set_level(BK2, 0);
+            } else {
+                gpio_set_level(BK1, 0);
+            };
+            gpio_set_level(BKG, 0);
+            rmt_add_channel_to_group(RMT_CLK_CHANNEL);
+            rmt_add_channel_to_group(RMT_SI_CHANNEL);
+            rmt_write_items(RMT_CLK_CHANNEL,
+                            rmt_clk_data,
+                            sizeof(rmt_clk_data) / sizeof(rmt_clk_data[0]),
+                            false);
+            rmt_write_items(RMT_SI_CHANNEL,
+                            rmt_si_data,
+                            sizeof(rmt_si_data) / sizeof(rmt_si_data[0]),
+                            true);
+        };
+
         for (uint8_t row = 0; row < 32; row++) {
-            rmt_si_data[row].level1 =
-                (vfd_gram[cycle * 2 + 1][row / 8] & (1 << (row & 7))) >= 1;
-            rmt_si_data[row].level0 =
-                (vfd_gram[cycle * 2 + 2][row / 8] & (1 << (row & 7))) >= 1;
+            rmt_si_data[row].level1 = (vfd_gram[127][row / 8] & (1 << (row & 7))) >= 1;
+            rmt_si_data[row].level0 = (vfd_gram[0][row / 8] & (1 << (row & 7))) >= 1;
         };
         gpio_set_level(BKG, 1);
-        if (cycle & 1) {
-            gpio_set_level(BK1, 1);
-        } else {
-            gpio_set_level(BK2, 1);
-        };
-        vTaskDelay(5 / (1000 * portTICK_PERIOD_MS));
+        gpio_set_level(BK1, 1);
+        for (int i = 0; i <= CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ; i++)
+            ;
+        ;
         gpio_set_level(LAT, 1);
-        if (cycle == 0 || cycle == 1) {
-            gpio_set_level(SIG, 1);
-            gpio_set_level(CLKG, 0);
-            gpio_set_level(CLKG, 1);
-            gpio_set_level(SIG, 0);
-        } else {
-            gpio_set_level(CLKG, 0);
-            gpio_set_level(CLKG, 1);
-        };
-        vTaskDelay(5 / (1000 * portTICK_PERIOD_MS));
+        gpio_set_level(CLKG, 0);
+        gpio_set_level(CLKG, 1);
+        for (int i = 0; i <= CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ; i++)
+            ;
         gpio_set_level(LAT, 0);
-        if (cycle & 1) {
-            gpio_set_level(BK2, 0);
-        } else {
-            gpio_set_level(BK1, 0);
-        };
+        gpio_set_level(BK2, 0);
         gpio_set_level(BKG, 0);
         rmt_add_channel_to_group(RMT_CLK_CHANNEL);
         rmt_add_channel_to_group(RMT_SI_CHANNEL);
@@ -172,35 +202,7 @@ void vfd_send_data(void) {
                         rmt_si_data,
                         sizeof(rmt_si_data) / sizeof(rmt_si_data[0]),
                         true);
-    };
-
-    for (uint8_t row = 0; row < 32; row++) {
-        rmt_si_data[row].level1 = (vfd_gram[127][row / 8] & (1 << (row & 7))) >= 1;
-        rmt_si_data[row].level0 = (vfd_gram[0][row / 8] & (1 << (row & 7))) >= 1;
-    };
-    gpio_set_level(BKG, 1);
-    gpio_set_level(BK1, 1);
-    for (int i = 0; i <= CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ; i++)
-        ;
-    ;
-    gpio_set_level(LAT, 1);
-    gpio_set_level(CLKG, 0);
-    gpio_set_level(CLKG, 1);
-    for (int i = 0; i <= CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ; i++)
-        ;
-    gpio_set_level(LAT, 0);
-    gpio_set_level(BK2, 0);
-    gpio_set_level(BKG, 0);
-    rmt_add_channel_to_group(RMT_CLK_CHANNEL);
-    rmt_add_channel_to_group(RMT_SI_CHANNEL);
-    rmt_write_items(RMT_CLK_CHANNEL,
-                    rmt_clk_data,
-                    sizeof(rmt_clk_data) / sizeof(rmt_clk_data[0]),
-                    false);
-    rmt_write_items(RMT_SI_CHANNEL,
-                    rmt_si_data,
-                    sizeof(rmt_si_data) / sizeof(rmt_si_data[0]),
-                    true);
+    }
 }
 
 void vfd_draw_pixel(uint8_t x, uint8_t y, uint8_t enable) {
@@ -243,4 +245,14 @@ void vfd_write_byte(uint8_t x, uint8_t y, uint8_t data) {
 void vfd_init(void) {
     rmt_data_init();
     vfd_gpio_init();
+}
+
+void vfd_start_send(void) {
+    vfd_init();
+    xTaskCreatePinnedToCore(vfd_send_data,
+                            "VFD send data",
+                            2048,
+                            NULL,
+                            configMAX_PRIORITIES - 1,
+                            NULL, 1);
 }

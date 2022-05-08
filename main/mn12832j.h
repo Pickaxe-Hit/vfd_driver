@@ -1,5 +1,7 @@
 #include "driver/gpio.h"
 #include "driver/rmt.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <math.h>
 #include <stdint.h>
 
@@ -37,3 +39,5 @@ void vfd_draw_square(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t ena
 void vfd_write_byte(uint8_t x, uint8_t y, uint8_t data);
 
 void vfd_init(void);
+
+void vfd_start_send(void);
