@@ -1,5 +1,7 @@
 #include "driver/gpio.h"
 #include "driver/rmt.h"
+#include "esp_err.h"
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <math.h>
@@ -22,15 +24,19 @@
 #define GPIOCTR GPIO_NUM_11
 #define VOUTCTR GPIO_NUM_12
 
-void rmt_data_init(void);
+void vfd_rmt_data_init(void);
 
-void rmt_clk_init(void);
+void vfd_rmt_clk_init(void);
 
 void vfd_gpio_init(void);
 
 void vfd_send_data(void);
 
 void vfd_draw_pixel(uint8_t x, uint8_t y, uint8_t enable);
+
+void vfd_draw_horz_line(uint8_t x, uint8_t y, uint8_t w, uint8_t show);
+
+void vfd_draw_vert_line(uint8_t x, uint8_t y, uint8_t h, uint8_t show);
 
 void vfd_draw_cycle(uint8_t x0, uint8_t y0, uint8_t r, uint8_t enable);
 
