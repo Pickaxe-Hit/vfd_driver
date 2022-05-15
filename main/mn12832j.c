@@ -126,7 +126,7 @@ void vfd_gpio_init(void) {
     esp_rom_gpio_pad_select_gpio(GPIOCTR);
     gpio_set_direction(GPIOCTR, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIOCTR, 0);
-    xTaskCreatePinnedToCore(vfd_vout_enable, "vfd_vout_enable", 2048, NULL, 2, NULL, 1);
+    // xTaskCreatePinnedToCore(vfd_vout_enable, "vfd_vout_enable", 2048, NULL, 2, NULL, 1);
 }
 
 uint8_t vfd_gram[128][4] = {0};
@@ -135,9 +135,9 @@ void vfd_send_data(void) {
     for (;;) {
         for (uint8_t cycle = 0; cycle < 63; cycle++) {
             for (uint8_t row = 0; row < 32; row++) {
-                vfd_rmt_si_data[row].level1 =
-                    (vfd_gram[cycle * 2 + 1][row / 8] & (1 << (row & 7))) >= 1;
                 vfd_rmt_si_data[row].level0 =
+                    (vfd_gram[cycle * 2 + 1][row / 8] & (1 << (row & 7))) >= 1;
+                vfd_rmt_si_data[row].level1 =
                     (vfd_gram[cycle * 2 + 2][row / 8] & (1 << (row & 7))) >= 1;
             };
             gpio_set_level(BKG, 1);
@@ -178,19 +178,16 @@ void vfd_send_data(void) {
         };
 
         for (uint8_t row = 0; row < 32; row++) {
-            vfd_rmt_si_data[row].level1 = (vfd_gram[127][row / 8] & (1 << (row & 7))) >= 1;
-            vfd_rmt_si_data[row].level0 = (vfd_gram[0][row / 8] & (1 << (row & 7))) >= 1;
+            vfd_rmt_si_data[row].level0 = (vfd_gram[127][row / 8] & (1 << (row & 7))) >= 1;
+            vfd_rmt_si_data[row].level1 = (vfd_gram[0][row / 8] & (1 << (row & 7))) >= 1;
         };
         gpio_set_level(BKG, 1);
         gpio_set_level(BK1, 1);
-        for (int i = 0; i <= CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ; i++)
-            ;
-        ;
+        vTaskDelay(5 / (1000 * portTICK_PERIOD_MS));
         gpio_set_level(LAT, 1);
         gpio_set_level(CLKG, 0);
         gpio_set_level(CLKG, 1);
-        for (int i = 0; i <= CONFIG_ESP32S3_DEFAULT_CPU_FREQ_MHZ; i++)
-            ;
+        vTaskDelay(5 / (1000 * portTICK_PERIOD_MS));
         gpio_set_level(LAT, 0);
         gpio_set_level(BK2, 0);
         gpio_set_level(BKG, 0);
