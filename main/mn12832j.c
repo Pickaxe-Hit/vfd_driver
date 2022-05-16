@@ -126,7 +126,7 @@ void vfd_gpio_init(void) {
     esp_rom_gpio_pad_select_gpio(GPIOCTR);
     gpio_set_direction(GPIOCTR, GPIO_MODE_OUTPUT);
     gpio_set_level(GPIOCTR, 0);
-    // xTaskCreatePinnedToCore(vfd_vout_enable, "vfd_vout_enable", 2048, NULL, 2, NULL, 1);
+    xTaskCreatePinnedToCore(vfd_vout_enable, "vfd_vout_enable", 2048, NULL, 2, NULL, 1);
 }
 
 uint8_t vfd_gram[128][4] = {0};
