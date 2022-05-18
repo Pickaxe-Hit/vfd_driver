@@ -42,16 +42,12 @@ void app_main(void) {
     esp_rom_gpio_pad_select_gpio(FLCTR);
     gpio_set_direction(HVCTR, GPIO_MODE_OUTPUT);
     gpio_set_direction(FLCTR, GPIO_MODE_OUTPUT);
-    gpio_set_level(FLCTR, 1);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-    gpio_set_level(HVCTR, 1);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
     xTaskCreatePinnedToCore(vfd_draw, "vfd_draw", 4096, NULL, 1, NULL, 0);
     esp_rom_gpio_pad_select_gpio(GPIO_NUM_0);
     gpio_set_direction(GPIO_NUM_0, GPIO_MODE_INPUT);
-    uint8_t vfd_vout = 1;
+    uint8_t vfd_vout = 0;
     for (;;) {
-        for (; !gpio_get_level(GPIO_NUM_0);) {
+        while (!gpio_get_level(GPIO_NUM_0)) {
             if (vfd_vout == 1) {
                 gpio_set_level(HVCTR, 0);
                 gpio_set_level(FLCTR, 0);
@@ -64,6 +60,11 @@ void app_main(void) {
                 vfd_vout = 1;
                 vTaskDelay(1000 / portTICK_PERIOD_MS);
             }
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+            gpio_set_level(HVCTR, 0);
+            gpio_set_level(FLCTR, 0);
+            vfd_vout = 0;
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
 }
