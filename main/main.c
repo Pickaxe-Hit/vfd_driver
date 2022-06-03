@@ -1,16 +1,16 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "mn12832j.h"
+#include "mn12864k.h"
 
 void vfd_draw(void) {
     for (;;) {
-        for (uint8_t y = 0; y <= 31; y++) {
+        for (uint8_t y = 0; y <= 63; y++) {
             for (uint8_t x = 0; x <= 127; x++) {
                 vfd_draw_pixel(x, y, 1);
                 vTaskDelay(20 / portTICK_PERIOD_MS);
             }
         }
-        for (uint8_t y = 0; y <= 31; y++) {
+        for (uint8_t y = 0; y <= 63; y++) {
             for (uint8_t x = 0; x <= 127; x++) {
                 vfd_draw_pixel(x, y, 0);
                 vTaskDelay(20 / portTICK_PERIOD_MS);
@@ -42,7 +42,8 @@ void app_main(void) {
     esp_rom_gpio_pad_select_gpio(FLCTR);
     gpio_set_direction(HVCTR, GPIO_MODE_OUTPUT);
     gpio_set_direction(FLCTR, GPIO_MODE_OUTPUT);
-    xTaskCreatePinnedToCore(vfd_draw, "vfd_draw", 4096, NULL, 1, NULL, 0);
+    //xTaskCreatePinnedToCore(vfd_draw, "vfd_draw", 4096, NULL, 1, NULL, 0);
+    all();
     esp_rom_gpio_pad_select_gpio(GPIO_NUM_0);
     gpio_set_direction(GPIO_NUM_0, GPIO_MODE_INPUT);
     uint8_t vfd_vout = 0;

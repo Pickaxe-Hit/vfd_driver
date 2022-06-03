@@ -7,11 +7,13 @@
 #include <math.h>
 #include <stdint.h>
 
-#define RMT_CLK_CHANNEL RMT_CHANNEL_0
-#define RMT_SI_CHANNEL RMT_CHANNEL_1
+#define RMT_CLK_CHANNEL RMT_CHANNEL_2
+#define RMT_SI_CHANNEL RMT_CHANNEL_0
 
-#define BK1 GPIO_NUM_4
-#define BK2 GPIO_NUM_5
+//#define RMT_CLKG_CHANNEL RMT_CHANNEL_1
+//#define RMT_SIG_CHANNEL RMT_CHANNEL_0
+
+#define BK GPIO_NUM_5
 #define LAT GPIO_NUM_6
 #define CLK GPIO_NUM_7
 #define SI GPIO_NUM_15
@@ -47,3 +49,5 @@ void vfd_write_byte(uint8_t x, uint8_t y, uint8_t data);
 void vfd_init(void);
 
 void vfd_start_send(void);
+
+void all(void);
